@@ -1,10 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+<p>亲爱的 {{ user.username }}，</p>
+
+<p>您已成功创建了新任务：“<strong>{{ task.title }}</strong>”。</p>
+
+<p><strong>任务详情：</strong><br>
+标题：{{ task.title }}<br>
+描述：{{ task.description }}<br>
+截止日期：{{ task.due_date }}</p>
+
+<p>祝好，<br>
+任务管理系统</p>

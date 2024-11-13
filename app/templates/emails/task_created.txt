@@ -1,0 +1,11 @@
+亲爱的 {{ user.username }}，
+
+您已成功创建了新任务：“{{ task.title }}”。
+
+任务详情：
+标题：{{ task.title }}
+描述：{{ task.description }}
+截止日期：{{ task.due_date }}
+
+祝好，
+任务管理系统

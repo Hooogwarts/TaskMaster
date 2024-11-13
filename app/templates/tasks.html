@@ -1,10 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+<!-- app/templates/tasks.html -->
+{% extends "base.html" %}
+{% block content %}
+    <h2>我的任务</h2>
+    <ul>
+    {% for task in tasks %}
+        <li>
+            <strong>{{ task.title }}</strong> - {{ task.due_date.strftime('%Y-%m-%d %H:%M:%S') }} - <em>{{ task.status }}</em>
+            {% if task.user_id == current_user.id %}
+                （我创建的{% if task.assigned_user %}，分配给：{{ task.assigned_user.username }}{% endif %}）
+            {% elif task.assigned_user_id == current_user.id %}
+                （分配给我的，由 {{ task.author.username }} 创建）
+            {% endif %}
+            <a href="{{ url_for('main.edit_task', id=task.id) }}">编辑</a>
+            <form action="{{ url_for('main.delete_task', id=task.id) }}" method="post" style="display: inline;">
+                {{ form.hidden_tag() }}
+                <input type="submit" value="删除" onclick="return confirm('确定要删除此任务吗？');">
+            </form>
+        </li>
+    {% else %}
+        <li>暂无任务。</li>
+    {% endfor %}
+    </ul>
+    <p><a href="{{ url_for('main.create_task') }}">创建新任务</a></p>
+{% endblock %}

@@ -1,0 +1,13 @@
+亲爱的 {{ user.username }}，
+
+{{ assigner.username }} 分配了一个新任务给您：“{{ task.title }}”。
+
+任务详情：
+标题：{{ task.title }}
+描述：{{ task.description }}
+截止日期：{{ task.due_date }}
+
+请登录任务管理系统查看详情。
+
+祝好，
+任务管理系统
