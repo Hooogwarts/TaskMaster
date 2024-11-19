@@ -170,3 +170,4 @@ WTForms==3.2.1
 WTForms-SQLAlchemy==0.4.2
 xlrd==2.0.1
 zipp==3.20.2
+numpy==1.21.0
