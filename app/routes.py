@@ -13,38 +13,38 @@ bp = Blueprint('main', __name__)
 # 配置日志
 logging.basicConfig(level=logging.DEBUG)
 
+
 @bp.route('/')
 def index():
     return render_template('index.html')
+
 
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        logging.debug(f"Registering user: {form.username.data}")
         user = User(username=form.username.data, email=form.email.data)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('恭喜您，注册成功！', 'success')
+        flash('注册成功，请登录！', 'success')
         return redirect(url_for('main.login'))
     return render_template('register.html', title='注册', form=form)
+
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        logging.debug(f"Attempting to log in user with email: {form.email.data}")
         user = User.query.filter_by(email=form.email.data).first()
         if user and user.check_password(form.password.data):
             login_user(user)
-            logging.debug("User logged in successfully.")
             flash('登录成功！', 'success')
             return redirect(url_for('main.index'))
         else:
-            logging.debug("Login failed: Incorrect email or password.")
             flash('登录失败，请检查邮箱和密码。', 'danger')
     return render_template('login.html', title='登录', form=form)
+
 
 @bp.route('/logout')
 @login_required
@@ -53,12 +53,22 @@ def logout():
     flash('您已退出登录。', 'info')
     return redirect(url_for('main.index'))
 
-@bp.route('/create_task', methods=['GET', 'POST'])
+
+@bp.route('/tasks')
+@login_required
+def tasks():
+    tasks = Task.query.filter(
+        (Task.user_id == current_user.id) | (Task.assigned_user_id == current_user.id)
+    ).all()
+    form = EmptyForm()
+    return render_template('tasks.html', title='我的任务', tasks=tasks, form=form)
+
+
+@bp.route('/task/create', methods=['GET', 'POST'])
 @login_required
 def create_task():
     form = TaskForm()
     if form.validate_on_submit():
-        logging.debug(f"Creating task: {form.title.data}")
         assigned_user = form.assigned_user.data
         task = Task(
             title=form.title.data,
@@ -75,28 +85,24 @@ def create_task():
             send_email(
                 subject='新任务分配给您',
                 recipients=[assigned_user.email],
-                text_body=render_template('emails/task_assigned.txt', user=assigned_user, task=task, assigner=current_user),
-                html_body=render_template('emails/task_assigned.html', user=assigned_user, task=task, assigner=current_user)
+                text_body=render_template('emails/task_assigned.txt', user=assigned_user, task=task,
+                                          assigner=current_user),
+                html_body=render_template('emails/task_assigned.html', user=assigned_user, task=task,
+                                          assigner=current_user)
             )
 
         flash('任务已创建。', 'success')
         return redirect(url_for('main.tasks'))
     return render_template('create_task.html', title='创建任务', form=form)
 
-@bp.route('/tasks')
-@login_required
-def tasks():
-    tasks = Task.query.filter(
-        (Task.user_id == current_user.id) | (Task.assigned_user_id == current_user.id)
-    ).all()
-    form = EmptyForm()
-    return render_template('tasks.html', title='我的任务', tasks=tasks, form=form)
 
 @bp.route('/task/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_task(id):
     task = Task.query.get_or_404(id)
-    if task.author != current_user:
+
+    # 校验任务的权限，允许任务的创建者或被分配的用户编辑
+    if task.author != current_user and task.assigned_user != current_user:
         abort(403)  # 禁止访问
 
     form = TaskForm()
@@ -113,8 +119,10 @@ def edit_task(id):
             send_email(
                 subject='任务已重新分配给您',
                 recipients=[assigned_user.email],
-                text_body=render_template('emails/task_assigned.txt', user=assigned_user, task=task, assigner=current_user),
-                html_body=render_template('emails/task_assigned.html', user=assigned_user, task=task, assigner=current_user)
+                text_body=render_template('emails/task_assigned.txt', user=assigned_user, task=task,
+                                          assigner=current_user),
+                html_body=render_template('emails/task_assigned.html', user=assigned_user, task=task,
+                                          assigner=current_user)
             )
 
         flash('任务已更新。', 'success')
@@ -126,11 +134,12 @@ def edit_task(id):
         form.assigned_user.data = task.assigned_user
     return render_template('edit_task.html', title='编辑任务', form=form, task=task)
 
+
 @bp.route('/task/<int:id>/delete', methods=['POST'])
 @login_required
 def delete_task(id):
     task = Task.query.get_or_404(id)
-    if task.user_id != current_user.id:  # 检查 user_id
+    if task.author != current_user:
         abort(403)  # 禁止访问
 
     form = EmptyForm()
@@ -142,14 +151,17 @@ def delete_task(id):
     else:
         abort(400)  # 错误的请求
 
-# 错误处理程序
+
+# 错误处理
 @bp.app_errorhandler(403)
 def forbidden(error):
     return render_template('403.html'), 403
 
+
 @bp.app_errorhandler(404)
 def page_not_found(error):
     return render_template('404.html'), 404
+
 
 @bp.app_errorhandler(500)
 def internal_server_error(error):

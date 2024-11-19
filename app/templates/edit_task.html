@@ -1,44 +1,60 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2>编辑任务</h2>
-    <form method="POST" action="{{ url_for('main.edit_task', id=task.id) }}">
+<div class="container mt-4">
+    <h2 class="mb-4 text-center text-primary">编辑任务</h2>
+    <form method="POST" action="{{ url_for('main.edit_task', id=task.id) }}" class="needs-validation" novalidate>
         {{ form.hidden_tag() }}
-        <p>
-            {{ form.title.label }}<br>
-            {{ form.title(size=64) }}<br>
+
+        <!-- 任务标题 -->
+        <div class="mb-3">
+            <label for="title" class="form-label">{{ form.title.label }}</label>
+            {{ form.title(class="form-control", id="title", placeholder="请输入任务标题") }}
             {% for error in form.title.errors %}
-                <span style="color: red;">[{{ error }}]</span>
+                <div class="text-danger small">{{ error }}</div>
             {% endfor %}
-        </p>
-        <p>
-            {{ form.description.label }}<br>
-            {{ form.description(rows=5, cols=40) }}<br>
+        </div>
+
+        <!-- 任务描述 -->
+        <div class="mb-3">
+            <label for="description" class="form-label">{{ form.description.label }}</label>
+            {{ form.description(class="form-control", id="description", placeholder="请输入任务描述", rows=5) }}
             {% for error in form.description.errors %}
-                <span style="color: red;">[{{ error }}]</span>
+                <div class="text-danger small">{{ error }}</div>
             {% endfor %}
-        </p>
-        <p>
-            {{ form.due_date.label }}<br>
-            {{ form.due_date() }}<br>
-            <small>格式：YYYY-MM-DD HH:MM:SS</small><br>
+        </div>
+
+        <!-- 截止日期 -->
+        <div class="mb-3">
+            <label for="due_date" class="form-label">{{ form.due_date.label }}</label>
+            {{ form.due_date(class="form-control", id="due_date", placeholder="格式：YYYY-MM-DD HH:MM:SS") }}
+            <small class="form-text text-muted">格式：YYYY-MM-DD HH:MM:SS</small>
             {% for error in form.due_date.errors %}
-                <span style="color: red;">[{{ error }}]</span>
+                <div class="text-danger small">{{ error }}</div>
             {% endfor %}
-        </p>
-        <p>
-            {{ form.assigned_user.label }}<br>
-            {{ form.assigned_user() }}<br>
+        </div>
+
+        <!-- 分配用户 -->
+        <div class="mb-3">
+            <label for="assigned_user" class="form-label">{{ form.assigned_user.label }}</label>
+            {{ form.assigned_user(class="form-select", id="assigned_user") }}
             {% for error in form.assigned_user.errors %}
-                <span style="color: red;">[{{ error }}]</span>
+                <div class="text-danger small">{{ error }}</div>
             {% endfor %}
-        </p>
-        <p>
-            {{ form.status.label }}<br>
-            {{ form.status() }}<br>
+        </div>
+
+        <!-- 任务状态 -->
+        <div class="mb-3">
+            <label for="status" class="form-label">{{ form.status.label }}</label>
+            {{ form.status(class="form-select", id="status") }}
             {% for error in form.status.errors %}
-                <span style="color: red;">[{{ error }}]</span>
+                <div class="text-danger small">{{ error }}</div>
             {% endfor %}
-        </p>
-        <p>{{ form.submit(value='更新任务') }}</p>
+        </div>
+
+        <!-- 提交按钮 -->
+        <div class="d-grid gap-2">
+            {{ form.submit(class="btn btn-primary btn-lg", value="更新任务") }}
+        </div>
     </form>
+</div>
 {% endblock %}

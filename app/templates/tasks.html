@@ -1,25 +1,43 @@
 <!-- app/templates/tasks.html -->
 {% extends "base.html" %}
 {% block content %}
-    <h2>我的任务</h2>
-    <ul>
-    {% for task in tasks %}
-        <li>
-            <strong>{{ task.title }}</strong> - {{ task.due_date.strftime('%Y-%m-%d %H:%M:%S') }} - <em>{{ task.status }}</em>
-            {% if task.user_id == current_user.id %}
-                （我创建的{% if task.assigned_user %}，分配给：{{ task.assigned_user.username }}{% endif %}）
-            {% elif task.assigned_user_id == current_user.id %}
-                （分配给我的，由 {{ task.author.username }} 创建）
-            {% endif %}
-            <a href="{{ url_for('main.edit_task', id=task.id) }}">编辑</a>
-            <form action="{{ url_for('main.delete_task', id=task.id) }}" method="post" style="display: inline;">
-                {{ form.hidden_tag() }}
-                <input type="submit" value="删除" onclick="return confirm('确定要删除此任务吗？');">
-            </form>
-        </li>
+<div class="container mt-4">
+    <h2 class="text-center text-primary mb-4">我的任务</h2>
+
+    {% if tasks %}
+        <div class="list-group">
+        {% for task in tasks %}
+            <div class="list-group-item d-flex justify-content-between align-items-center shadow-sm mb-3">
+                <div>
+                    <h5 class="mb-1 text-dark">{{ task.title }}</h5>
+                    <small class="text-muted">
+                        截止日期：{{ task.due_date.strftime('%Y-%m-%d %H:%M:%S') }} <br>
+                        状态：<strong>{{ task.status }}</strong>
+                        {% if task.user_id == current_user.id %}
+                            （我创建的{% if task.assigned_user %}，分配给：{{ task.assigned_user.username }}{% endif %}）
+                        {% elif task.assigned_user_id == current_user.id %}
+                            （分配给我的，由 {{ task.author.username }} 创建）
+                        {% endif %}
+                    </small>
+                </div>
+                <div>
+                    <a href="{{ url_for('main.edit_task', id=task.id) }}" class="btn btn-sm btn-warning me-2">编辑</a>
+                    <form action="{{ url_for('main.delete_task', id=task.id) }}" method="post" style="display: inline;">
+                        {{ form.hidden_tag() }}
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('确定要删除此任务吗？');">删除</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
     {% else %}
-        <li>暂无任务。</li>
-    {% endfor %}
-    </ul>
-    <p><a href="{{ url_for('main.create_task') }}">创建新任务</a></p>
+        <div class="alert alert-info text-center">
+            暂无任务。
+        </div>
+    {% endif %}
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('main.create_task') }}" class="btn btn-primary btn-lg">创建新任务</a>
+    </div>
+</div>
 {% endblock %}
