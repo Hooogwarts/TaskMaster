@@ -1,5 +1,4 @@
 Cython
-wheelCython
 wheel
 alembic==1.14.0
 aniso8601==9.0.1
