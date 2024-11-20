@@ -3,3 +3,6 @@
 venv/
 # 忽略 PyTorch 库
 *.dylib
+
+# 忽略 JetBrains IDE 相关文件
+.idea/
